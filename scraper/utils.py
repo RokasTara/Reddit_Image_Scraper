@@ -36,7 +36,6 @@ def generate_filename(url, path):
     return path + url.split('/')[-1]
 
 # get current date
-
 def get_current_date():
     return time.strftime("%Y-%m-%d")
 
@@ -57,6 +56,6 @@ def create_directory_for_date(subreddit : str, date : str):
     except:
         print(f"Directory \"{directory}\" already exist")
         pass
-    return directory
+    return directory + '/'
     
 

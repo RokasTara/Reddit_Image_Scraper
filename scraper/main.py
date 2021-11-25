@@ -13,7 +13,7 @@ hot = subreddit.hot(limit=1000)
 date = get_current_date()
 
 for name in subreddits:
-    top = reddit.subreddit(name).top(limit=50, time_filter='day')
+    top = reddit.subreddit(name).top(limit=5, time_filter='day')
     create_directory(name)
     path = create_directory_for_date(name, get_current_date())
     
