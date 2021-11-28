@@ -4,7 +4,9 @@ import time
 import urllib.request
 import os
 import pandas as pd
+import logging
 
+logging.basicConfig(level=logging.INFO , format='%(asctime)s - %(levelname)s - %(message)s', filename='scraper.log')
 
 # create a reddit scraper class to handle all the scraping 
 class RedditScraper:
@@ -28,9 +30,13 @@ class RedditScraper:
     # load reddit credentials
     @staticmethod
     def load_credentials():
-        with open('credentials.json', 'r') as f:
-            credentials = json.load(f)
-        return credentials
+        try:
+            with open('credentials.json', 'r') as f:
+                credentials = json.load(f)
+            return credentials
+        except FileNotFoundError:
+            logging.critical("Credentials file not found")
+            return None
 
     #create reddit instance
     def create_reddit_object(self):
@@ -40,6 +46,7 @@ class RedditScraper:
                         user_agent=credentials['user_agent'],
                         username = credentials['username'],
                         password = credentials['password'])
+        logging.info("Reddit object created")
         return reddit
 
     #download image
@@ -48,15 +55,16 @@ class RedditScraper:
         try: urllib.request.urlretrieve(url, filename)
         
         except TypeError:
-            print("failed to download the file")
+            logging.error("failed to download the image")
             return
     
     @staticmethod    
     def generate_filename(url, path):
         try: 
             os.mkdir(path + "files/")
+            logging.info(f"directory {path}files/ was created")
         except:
-            print(f"Directory \"{path}\"files/ already exist")
+            logging.info(f"Directory \"{path}\"files/ already exist")
             pass
         return path + "files/" + url.split('/')[-1]
 
@@ -71,8 +79,9 @@ class RedditScraper:
         directory = f"{subreddit}"
         try: 
             os.mkdir("downloads/" + directory)
+            logging.info(f"Directory \"{directory}\" created")
         except:
-            print(f"Directory \"{directory}\" already exist")
+            logging.info(f"Directory \"{directory}\" already exist")
             pass
         return directory
 
@@ -81,8 +90,9 @@ class RedditScraper:
         directory = f"downloads/{subreddit}/{date}"
         try: 
             os.mkdir(directory)
+            logging.info(f"Directory \"{directory}\" created")
         except:
-            print(f"Directory \"{directory}\" already exist")
+            logging.info(f"Directory \"{directory}\" already exist")
             pass
         return directory + '/'
     
@@ -106,9 +116,9 @@ class RedditScraper:
             metrics.append(self.generate_metrics(submission, filename, comment_list))
             if self.is_image(submission):
                 self.download_image(submission.url, filename)
-                print(f"Downloaded {submission.url}")
+                logging.info(f"Downloaded {submission.url}")
             else:
-                print(f"{submission.url} is not an image")
+                logging.warning(f"{submission.url} is not an image")
         self.save_metrics_to_csv(metrics, path + 'metrics.csv')
                 
     #download images from a list of subreddits 
